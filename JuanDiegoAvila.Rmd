@@ -8,4 +8,114 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+```{r echo=FALSE, include=FALSE}
+movies <- read.csv("movies.csv")
+library(dplyr)
+library(ggplot2)
+library(purrr)
+```
+
+## 4.3 ¿Cuál es la película que más votos tuvo?
+
+```{r}
+movies[movies$voteCount == max(movies$voteCount, na.rm = T),]$title
+```
+
+`r movies[movies$voteCount == max(movies$voteCount, na.rm = T),]$title` es la película con más votos, con una cantidad de   `r movies[movies$voteCount == max(movies$voteCount, na.rm = T),]$voteCount` votos.
+
+
+## 4.4  ¿Cuál es la peor película de acuerdo a los votos de todos los usuarios?
+
+```{r}
+
+movies[movies$voteCount == min(movies$voteCount, na.rm = T),]$title
+movies[movies$voteCount == min(movies$voteCount, na.rm = T),]$title[1]
+```
+
+`r movies[movies$voteCount == min(movies$voteCount, na.rm = T),]$title[1]` es la película con menos votos, con una cantidad de   `r movies[movies$voteCount == min(movies$voteCount, na.rm = T),]$voteCount[1]` voto/votos. Aunque muchas peliculas tienen esta cantidad de votos, se filtró el primer resultado.
+
+
+## 4.5 ¿Cuántas películas se hicieron en cada año? ¿En qué año se hicieron más películas? Haga un gráfico de barras
+
+```{r}
+
+fecha <- as.Date(movies$releaseDate)
+year <- as.factor(format(fecha, "%Y"))
+movies$year <- year
+peliculas_por_ano <- group_by(movies, year)
+resultado <- summarize(peliculas_por_ano, n=n())
+
+ggplot(resultado , 
+       aes(x = year, y = n) ) +
+       geom_col() +
+       xlab("Year") +
+       ylab("Cantidad de peliculas") +
+       ggtitle("Cantidad de peliculas por año")+
+       theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+```
+ 
+Se hicieron más películas en el año `r resultado[resultado$n == max(as.numeric(as.character(resultado$n)), na.rm = T), ]$year` teniendo una cantidad de `r resultado[resultado$n == max(as.numeric(as.character(resultado$n)), na.rm = T), ]$n`.
+
+## 4.6  ¿Cuál es el género principal de las 20 películas más recientes? ¿Cuál es el género principal que predomina en el conjunto de datos? Represéntelo usando un gráfico
+
+```{r}
+
+movies$releaseDate <- as.Date(movies$releaseDate, "%Y/%m/%d")
+movies <- movies[order(movies$releaseDate),]
+ultimas_veinte <- movies[1:20,]
+
+#movies_ordenadas <- arrange(movies, releaseDate)
+#ultimas_veinte <- head(movies_ordenadas, n = 20)
+ultimas_veinte$generos_separados <- strsplit(ultimas_veinte$genres, "\\|")
+ultimas_veinte$genero_principal <- sapply(ultimas_veinte$generos_separados, `[`, 1)
+
+#conteo_generos <- as.data.frame(table(ultimas_veinte$genero_principal))
+#colnames(conteo_generos) <- c("genero_principal", "conteo")
+
+ggplot(ultimas_veinte, aes(ultimas_veinte$title, ultimas_veinte$genero_principal)) + 
+  geom_bar(stat="identity") +
+  xlab("Genero Principal") +
+  ylab("Generos") +
+  ggtitle("Genero principal de las 20 peliculas mas recientes") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+
+conteo_genero_principal <- table(ultimas_veinte$genero_principal)
+genero_principal_total <- names(which.max(conteo_genero_principal))
+
+
+```
+
+El genero principal que predomina en el cojunto de datos es `r names(which.max(conteo_genero_principal))`
+
+## 4.7 ¿Las películas de qué genero principal obtuvieron mayores ganancias?
+
+```{r}
+
+movies$generos_separados <- strsplit(movies$genres, "\\|")
+movies$genero_principal <- sapply(ultimas_veinte$generos_separados, `[`, 1)
+generos <- group_by(movies, genero_principal)
+sumas_por_genero <- summarise(generos, revenue_sum = sum(revenue))
+genero_con_mas_revenue <- head(sumas_por_genero, n = 1)
+```
+
+Las películas de `r genero_con_mas_revenue$genero_principal` obtuvieron mayores ganancias con un total de `r genero_con_mas_revenue$revenue_sum`
+
+## 4.8  ¿La cantidad de actores influye en los ingresos de las películas?¿se han hecho películas con más actores en los últimos años?
+
+``` {r}
+cor(movies$actorsAmount, movies$revenue)
+
+movies$year <- year
+
+ggplot(movies, aes(x=actorsAmount, y=revenue)) + 
+  geom_point()
+
+ggplot(movies, aes(x=year, y=actorsAmount)) + 
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+```
+
 

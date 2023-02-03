@@ -18,11 +18,14 @@ installed.packages("purrr")
 installed.packages("corrplot")
 installed.packages("googledrive")
 installed.packages("tidyverse")
+installed.packages("nortest")
 
 library(dplyr)
 library(ggplot2)
 library(purrr)
 library(corrplot)
+library(nortest)
+library(tidyverse)
 
 
 summary(movies)
@@ -60,7 +63,6 @@ summary(movies)
 
 ### Budget
 ```{r echo=FALSE}
-library(nortest)
 budget <- movies$budget
 hist(budget)
 qqnorm(budget)
@@ -228,7 +230,7 @@ table(movies$video)
 ```
 
 
-### 1.¿Cuales son las 10 peliculas que contaron con más prsupuesto?
+### 4.1 ¿Cuales son las 10 peliculas que contaron con más prsupuesto?
 ```{r echo=FALSE}
 ordered_budget <- movies[order(movies$budget, decreasing=T),]
 topbudget<- ordered_budget[1:10,]
@@ -236,7 +238,7 @@ topbudget<- ordered_budget[1:10,]
 topbudget[,c("title")]
 ```
 
-### 2. ¿Cuáles son las 10 películas que más ingresos tuvieron?
+### 4.2 ¿Cuáles son las 10 películas que más ingresos tuvieron?
 ```{r echo=FALSE}
 ordered_revenue <- movies[order(movies$revenue, decreasing=T), ]
 toprevenue<- ordered_revenue[1:10,]
@@ -244,26 +246,6 @@ toprevenue<- ordered_revenue[1:10,]
 toprevenue[,c("title")]
 
 ```
-
-### 9.¿Es posible que la cantidad de hombres y mujeres en el reparto influya en la popularidad y los ingresos de las películas? 
-
-```{r echo =FALSE}
-library(corrplot)
-
-movies$castMenAmount <- as.numeric(gsub("[^0-9]", "", movies$castMenAmount))
-movies$castWomenAmount <- as.numeric(gsub("[^0-9]", "", movies$castWomenAmount))
-
-movies$castMenAmount[is.na(movies$castMenAmount)] <- 0
-movies$castWomenAmount[is.na(movies$castWomenAmount)] <- 0
-
-castrevpop <- cor(movies[,c("castMenAmount", "castWomenAmount", "revenue", "popularity")])
-
-corrplot(castrevpop)
-```
-
-Como se puede observar en la grafica, no se presenta ningun tipo de relacion entre la popularidad e ingresos con la cantidad de actores hombres y mujeres. 
-
-
 
 
 ## 4.3 ¿Cuál es la película que más votos tuvo?
@@ -384,6 +366,152 @@ ggplot(movies, aes(x=year, y=actorsAmount)) +
 
 En esta gráfica se puede observar que en los últimos años sí se ha aumentado la cantidad de actores en las películas.
 
+
+### 4.9 ¿Es posible que la cantidad de hombres y mujeres en el reparto influya en la popularidad y los ingresos de las películas? 
+
+```{r echo =FALSE}
+library(corrplot)
+
+movies$castMenAmount <- as.numeric(gsub("[^0-9]", "", movies$castMenAmount))
+movies$castWomenAmount <- as.numeric(gsub("[^0-9]", "", movies$castWomenAmount))
+
+movies$castMenAmount[is.na(movies$castMenAmount)] <- 0
+movies$castWomenAmount[is.na(movies$castWomenAmount)] <- 0
+
+castrevpop <- cor(movies[,c("castMenAmount", "castWomenAmount", "revenue", "popularity")])
+
+corrplot(castrevpop)
+```
+
+Como se puede observar en la grafica, no se presenta ningun tipo de relacion entre la popularidad e ingresos con la cantidad de actores hombres y mujeres. 
+
+```{r echo = FALSE}
+installed.packages("corrplot")
+peliculas <- read.csv('movies.csv')
+library(corrplot)
+```
+
+## 4.10 ¿Quiénes son los directores que hicieron las 20 películas mejor calificadas? 
+
+```{r echo = FALSE}
+
+directores <-head(peliculas[order(peliculas$voteCount,decreasing=T),c("director","voteCount")],20) 
+
+directores
+
+
+```
+
+## 4.11 ¿Cómo  se  correlacionan  los  presupuestos  con  los  ingresos?  ¿Los  altos presupuestos significan altos ingresos? Haga los gráficos que necesite, histograma, diagrama de dispersión 
+```{r echo = FALSE}
+
+Matriz_correlacion <- cor(peliculas[,c("revenue","budget","voteAvg","voteCount","popularity","genresAmount","actorsAmount")])
+
+corrplot(Matriz_correlacion)
+
+
+```
+
+
+Los altos presupuestos si significan altos ingresos porque las variables si estan correlacionadas de forma lineal
+
+## 4.12 ¿Se asocian ciertos meses de lanzamiento con mejores ingresos? 
+```{r echo =FALSE}
+
+fechas <- as.Date(peliculas[, c("releaseDate")])
+
+
+ingresos_por_mes <- tapply(peliculas$revenue, format(fechas, "%m"), mean)
+
+barplot(ingresos_por_mes)
+
+
+
+```
+
+
+El mejor mes es Junio 
+
+## 4.13 ¿En qué meses se han visto los lanzamientos con mejores ingresos? ¿cuantas películas, en promedio, se han lanzado por mes? 
+
+
+```{r echo =FALSE}
+
+
+fechas <- as.Date(peliculas[peliculas$revenue >=161000169.8, c("releaseDate")])
+top_ingresos <- peliculas[peliculas$revenue >=161000169.8,]
+
+
+
+ingresos_por_mes <- tapply(top_ingresos$revenue, format(fechas, "%m"), mean)
+peliculas_por_mes <- tapply(top_ingresos$revenue, format(fechas, "%m"),length)
+
+barplot(ingresos_por_mes,xlab="Mes",ylab="Ingresos")
+barplot(peliculas_por_mes,xlab="Mes",ylab="Peliculas promedio")
+```
+
+
+El mes con mejores ingresos es Abril y el mes con más lanzamientos promedio de peliculas es Junio
+
+
+## 4.14 ¿Cómo se correlacionan las calificaciones con el éxito comercial? 
+```{r echo = FALSE}
+
+Matriz_correlacion <- cor(peliculas[,c("revenue","budget","voteAvg","voteCount","popularity","genresAmount","actorsAmount")])
+
+corrplot(Matriz_correlacion)
+
+
+```
+
+Las calificaciones y el exito comercial se correlacionan de forma lineal
+
+
+## 4.15 ¿A qué género principal pertenecen las películas más largas? 
+```{r echo = FALSE}
+peliculas$genres_fixed <- ifelse(grepl("\\|", peliculas$genres), peliculas$genres, paste0(peliculas$genres, "|NA"))
+top <- peliculas[peliculas$runtime >= 170 & !is.na(peliculas$genres), ]
+top$genres <- vapply(strsplit(top[,"genres"],split = "|", fixed =T),"[",1,FUN.VALUE =character(1))
+
+
+
+unique(top$genres,na.rm=TRUE)
+
+
+```
+
+
+##  Preguntas EXTRAS
+
+### Extra  ¿Cómo se correlacionan la duración de una pelicula con el éxito comercial? 
+```{r echo = FALSE}
+
+Matriz_correlacion <- cor(peliculas[,c("revenue","budget","voteAvg","voteCount","popularity","genresAmount","actorsAmount","runtime")])
+
+corrplot(Matriz_correlacion)
+colnames(peliculas)
+
+```
+
+
+La duración de una pelicula no tiene relación con su exito comercial
+
+
+### Extra  ¿Cuál es el top 5 de directores con más ganancias entre todas sus peliculas? 
+```{r echo =FALSE}
+
+revenue_by_director <- aggregate(revenue ~ director, data = peliculas, FUN = sum)
+
+
+revenue_by_director <- revenue_by_director[order(-revenue_by_director$revenue),]
+
+
+top_5_directors <- head(revenue_by_director, 5)
+
+top_5_directors
+
+```
+
 ### Extra: ¿La popularidad de los actores en la película afecta sus ingresos?
 
 ``` {r warning=FALSE}
@@ -445,7 +573,6 @@ Como se puede observar en la gráfica la mayoría de votos recibidos fueron en p
 ### Extra: ¿Hay alguna diferencia en los ingresos de las películas basadas en la cantidad de mujeres y hombres en el reparto?
 
 ```{r echo = FALSE}
-library(tidyverse)
 
 movies_women_cast <- filter(movies, castWomenAmount > castMenAmount)
 movies_men_cast <- filter(movies, castWomenAmount < castMenAmount)

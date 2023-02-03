@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r echo = FALSE}
-
+installed.packages("corrplot")
 peliculas <- read.csv('movies.csv')
 library(corrplot)
 ```
@@ -20,8 +20,10 @@ library(corrplot)
 
 ```{r echo = FALSE}
 
-head(peliculas[order(peliculas$voteCount,decreasing=T),
-               c("director","title","voteCount")],20)
+directores <-head(peliculas[order(peliculas$voteCount,decreasing=T),c("director","voteCount")],20) 
+
+directores
+
 
 ```
 
@@ -104,9 +106,9 @@ unique(top$genres,na.rm=TRUE)
 ```
 
 
-##Preguntas EXTRAS
+##  Preguntas EXTRAS
 
-##¿Cómo se correlacionan la duración de una pelicula con el éxito comercial? 
+##  ¿Cómo se correlacionan la duración de una pelicula con el éxito comercial? 
 ```{r echo = FALSE}
 
 Matriz_correlacion <- cor(peliculas[,c("revenue","budget","voteAvg","voteCount","popularity","genresAmount","actorsAmount","runtime")])
@@ -120,7 +122,7 @@ colnames(peliculas)
 La duración de una pelicula no tiene relación con su exito comercial
 
 
-##¿Cuál es el top 5 de directores con más ganancias entre todas sus peliculas? 
+##  ¿Cuál es el top 5 de directores con más ganancias entre todas sus peliculas? 
 ```{r echo =FALSE}
 
 revenue_by_director <- aggregate(revenue ~ director, data = peliculas, FUN = sum)

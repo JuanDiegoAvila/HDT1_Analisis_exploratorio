@@ -15,3 +15,13 @@ knitr::opts_chunk$set(echo = TRUE)
 peliculas <- read.csv('movies.csv')
 
 ```
+
+##  ¿Quiénes son los directores que hicieron las 20 películas mejor calificadas? 
+
+```{r echo = FALSE}
+
+head(peliculas[order(peliculas$voteCount,decreasing = T),c("title","voteCount","director")],20)
+
+```
+
+

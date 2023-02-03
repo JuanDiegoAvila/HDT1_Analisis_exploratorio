@@ -138,38 +138,47 @@ En esta gráfica se puede observar que en los últimos años sí se ha aumentado
 
 ``` {r warning=FALSE}
 
-#popularidad_df$actores <- strsplit(movies$actors, "\\|")
+movies$actorsMaxPopularity <- lapply(strsplit(movies$actorsPopularity, "\\|"), function(x) max(as.double(x)))
 
-actors <- movies$actors
+movies$actorsMaxPopularity <- as.numeric(movies$actorsMaxPopularity)
+movies$revenue <- as.numeric(movies$revenue)
+movies$actorsMaxPopularity<- movies$actorsMaxPopularity[1:nrow(movies)]
 
-actorsPopularity <- movies$actorsPopularity
+ggplot(movies, aes(actorsMaxPopularity, revenue)) + 
+ geom_point() +
+ theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
-popularidad_df <- data.frame(actors, actorsPopularity)
+cor(movies$revenue, movies$actorsMaxPopularity,method = "spearman", use="complete.obs")
 
+ggplot(movies, aes(x=actorsMaxPopularity, y=revenue)) + 
+  geom_boxplot()
 
-popularidad_df$actorsPopularity <- lapply(popularidad_df$actorsPopularity, function(x) {
-  x <- as.numeric(unlist(strsplit(x, "\\|")))
-  x[is.na(x) | !is.finite(x) | !is.numeric(x)] <- NA
-  x
-})
+quantile(movies$actorsMaxPopularity, seq(0,1,0.01), na.rm = T)
 
-popularidad_df$avg <- sapply(popularidad_df$actorsPopularity, mean, na.rm = TRUE)
+menos <- movies[movies$actorsMaxPopularity <= 82.57,]
 
-movies$popularidad_avg <- popularidad_df$avg
+ggplot(menos, aes(actorsMaxPopularity, revenue)) + 
+ geom_point() +
+ theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
-summary(movies$popularidad_avg)
+colnames(movies)
+Matriz_correlacion <- cor(movies[,c("revenue","budget","actorsMaxPopularity","voteAvg","voteCount","popularity","genresAmount","actorsAmount")])
 
-ggplot(movies, aes(x=popularidad_avg, y=revenue)) + 
-  geom_point() +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+corrplot(Matriz_correlacion)
 
 ```
 
-Como se puede observar la popularidad de los actores no afecta directamente a los ingresos de la película.
+Como se puede observar en el análisis de los cuantiles, eliminación de valores atípicos y las gráficas generadas, la popularidad de los actores no afecta directamente a los ingresos de la película.
 
 ## Pregunta extra: ¿El lenguaje en el que se produjo la película tiene relación con los votos recibidos por pelicula?
 
 ``` {r}
+
+ingles <- movies[movies$originalLanguage == "en",]
+nrow(ingles)
+
+otros <- movies[movies$originalLanguage != "en",]
+nrow(otros)
 
 ggplot(ultimas_veinte, aes(originalLanguage, voteCount)) + 
   geom_bar(stat="identity") +
@@ -180,4 +189,4 @@ ggplot(ultimas_veinte, aes(originalLanguage, voteCount)) +
 
 ```
 
-Como se puede observar en la gráfica la mayoría de votos recibidos fueron en películas cuyo lenguaje original es el ingles.
+Como se puede observar en la gráfica la mayoría de votos recibidos fueron en películas cuyo lenguaje original es el ingles. Cabe recalcar que hay `r nrow(ingles)` peliculas en ingles y `r nrow(otros)` peliculas en otros idiomas, lo que muestra que la mayoria son peliculas en ingles.

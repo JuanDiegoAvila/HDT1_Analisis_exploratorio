@@ -13,15 +13,125 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r echo = FALSE}
 
 peliculas <- read.csv('movies.csv')
-
+library(corrplot)
 ```
 
-##  ¿Quiénes son los directores que hicieron las 20 películas mejor calificadas? 
+## 4.10 ¿Quiénes son los directores que hicieron las 20 películas mejor calificadas? 
 
 ```{r echo = FALSE}
 
-head(peliculas[order(peliculas$voteCount,decreasing = T),c("title","voteCount","director")],20)
+head(peliculas[order(peliculas$voteCount,decreasing=T),
+               c("director","title","voteCount")],20)
 
 ```
 
+## 4.11 ¿Cómo  se  correlacionan  los  presupuestos  con  los  ingresos?  ¿Los  altos presupuestos significan altos ingresos? Haga los gráficos que necesite, histograma, diagrama de dispersión 
+```{r echo = FALSE}
+
+Matriz_correlacion <- cor(peliculas[,c("revenue","budget","voteAvg","voteCount","popularity","genresAmount","actorsAmount")])
+
+corrplot(Matriz_correlacion)
+
+
+```
+
+
+Los altos presupuestos si significan altos ingresos porque las variables si estan correlacionadas de forma lineal
+
+## 4.12 ¿Se asocian ciertos meses de lanzamiento con mejores ingresos? 
+```{r echo =FALSE}
+
+fechas <- as.Date(peliculas[, c("releaseDate")])
+
+
+ingresos_por_mes <- tapply(peliculas$revenue, format(fechas, "%m"), mean)
+
+barplot(ingresos_por_mes)
+
+
+
+```
+
+
+El mejor mes es Junio 
+
+## 4.13 ¿En qué meses se han visto los lanzamientos con mejores ingresos? ¿cuantas películas, en promedio, se han lanzado por mes? 
+
+
+```{r echo =FALSE}
+
+
+fechas <- as.Date(peliculas[peliculas$revenue >=161000169.8, c("releaseDate")])
+top_ingresos <- peliculas[peliculas$revenue >=161000169.8,]
+
+
+
+ingresos_por_mes <- tapply(top_ingresos$revenue, format(fechas, "%m"), mean)
+peliculas_por_mes <- tapply(top_ingresos$revenue, format(fechas, "%m"),length)
+
+barplot(ingresos_por_mes,xlab="Mes",ylab="Ingresos")
+barplot(peliculas_por_mes,xlab="Mes",ylab="Peliculas promedio")
+```
+
+
+El mes con mejores ingresos es Abril y el mes con más lanzamientos promedio de peliculas es Junio
+
+
+## 4.14 ¿Cómo se correlacionan las calificaciones con el éxito comercial? 
+```{r echo = FALSE}
+
+Matriz_correlacion <- cor(peliculas[,c("revenue","budget","voteAvg","voteCount","popularity","genresAmount","actorsAmount")])
+
+corrplot(Matriz_correlacion)
+
+
+```
+
+Las calificaciones y el exito comercial se correlacionan de forma lineal
+
+
+## 4.15 ¿A qué género principal pertenecen las películas más largas? 
+```{r echo = FALSE}
+peliculas$genres_fixed <- ifelse(grepl("\\|", peliculas$genres), peliculas$genres, paste0(peliculas$genres, "|NA"))
+top <- peliculas[peliculas$runtime >= 170 & !is.na(peliculas$genres), ]
+top$genres <- vapply(strsplit(top[,"genres"],split = "|", fixed =T),"[",1,FUN.VALUE =character(1))
+
+
+
+unique(top$genres,na.rm=TRUE)
+
+
+```
+
+
+##Preguntas EXTRAS
+
+##¿Cómo se correlacionan la duración de una pelicula con el éxito comercial? 
+```{r echo = FALSE}
+
+Matriz_correlacion <- cor(peliculas[,c("revenue","budget","voteAvg","voteCount","popularity","genresAmount","actorsAmount","runtime")])
+
+corrplot(Matriz_correlacion)
+colnames(peliculas)
+
+```
+
+
+La duración de una pelicula no tiene relación con su exito comercial
+
+
+##¿Cuál es el top 5 de directores con más ganancias entre todas sus peliculas? 
+```{r echo =FALSE}
+
+revenue_by_director <- aggregate(revenue ~ director, data = peliculas, FUN = sum)
+
+
+revenue_by_director <- revenue_by_director[order(-revenue_by_director$revenue),]
+
+
+top_5_directors <- head(revenue_by_director, 5)
+
+top_5_directors
+
+```
 

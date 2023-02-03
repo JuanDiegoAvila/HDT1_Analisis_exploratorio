@@ -10,6 +10,12 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 ```{r echo=FALSE, include=FALSE}
 movies <- read.csv("movies.csv")
+
+install.packages("dplyr")
+install.packages("ggplot2")
+install.packages("purrr")
+install.packages("corrplot")
+
 library(dplyr)
 library(ggplot2)
 library(purrr)

@@ -1,0 +1,202 @@
+---
+title: "Hoja De Trabajo 1"
+author: "Grupo#2"
+date: "2023-02-03"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r echo=FALSE, include=FALSE}
+movies <- read.csv("movies.csv")
+
+installed.packages("dplyr")
+installed.packages("ggplot2")
+installed.packages("purrr")
+installed.packages("corrplot")
+
+library(dplyr)
+library(ggplot2)
+library(purrr)
+library(corrplot)
+```
+
+
+## 4.3 ¿Cuál es la película que más votos tuvo?
+
+```{r}
+movies[movies$voteCount == max(movies$voteCount, na.rm = T),]$title
+```
+
+`r movies[movies$voteCount == max(movies$voteCount, na.rm = T),]$title` es la película con más votos, con una cantidad de   `r movies[movies$voteCount == max(movies$voteCount, na.rm = T),]$voteCount` votos.
+
+
+## 4.4  ¿Cuál es la peor película de acuerdo a los votos de todos los usuarios?
+
+```{r}
+
+movies[movies$voteCount == min(movies$voteCount, na.rm = T),]$title
+movies[movies$voteCount == min(movies$voteCount, na.rm = T),]$title[1]
+```
+
+`r movies[movies$voteCount == min(movies$voteCount, na.rm = T),]$title[1]` es la película con menos votos, con una cantidad de   `r movies[movies$voteCount == min(movies$voteCount, na.rm = T),]$voteCount[1]` voto/votos. Aunque muchas peliculas tienen esta cantidad de votos, se filtró el primer resultado.
+
+
+## 4.5 ¿Cuántas películas se hicieron en cada año? ¿En qué año se hicieron más películas? Haga un gráfico de barras
+
+```{r}
+
+fecha <- as.Date(movies$releaseDate)
+year <- as.factor(format(fecha, "%Y"))
+movies$year <- year
+peliculas_por_ano <- group_by(movies, year)
+resultado <- summarize(peliculas_por_ano, n=n())
+
+ggplot(resultado , 
+       aes(x = year, y = n) ) +
+       geom_col() +
+       xlab("Year") +
+       ylab("Cantidad de peliculas") +
+       ggtitle("Cantidad de peliculas por año")+
+       theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+```
+ 
+Se hicieron más películas en el año `r resultado[resultado$n == max(as.numeric(as.character(resultado$n)), na.rm = T), ]$year` teniendo una cantidad de `r resultado[resultado$n == max(as.numeric(as.character(resultado$n)), na.rm = T), ]$n`.
+
+## 4.6  ¿Cuál es el género principal de las 20 películas más recientes? ¿Cuál es el género principal que predomina en el conjunto de datos? Represéntelo usando un gráfico
+
+```{r}
+
+movies$releaseDate <- as.Date(movies$releaseDate, "%Y/%m/%d")
+movies <- movies[order(movies$releaseDate),]
+ultimas_veinte <- movies[1:20,]
+
+ultimas_veinte$generos_separados <- strsplit(ultimas_veinte$genres, "\\|")
+ultimas_veinte$genero_principal <- sapply(ultimas_veinte$generos_separados, `[`, 1)
+
+ggplot(ultimas_veinte, aes(title, genero_principal)) + 
+  geom_bar(stat="identity") +
+  xlab("Genero Principal") +
+  ylab("Generos") +
+  ggtitle("Genero principal de las 20 peliculas mas recientes") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+
+conteo_genero_principal <- table(ultimas_veinte$genero_principal)
+genero_principal_total <- names(which.max(conteo_genero_principal))
+
+
+```
+
+El genero principal que predomina en el cojunto de datos es `r names(which.max(conteo_genero_principal))`
+
+## 4.7 ¿Las películas de qué genero principal obtuvieron mayores ganancias?
+
+```{r}
+
+movies$generos_separados <- strsplit(movies$genres, "\\|")
+movies$genero_principal <- sapply(ultimas_veinte$generos_separados, `[`, 1)
+generos <- group_by(movies, genero_principal)
+sumas_por_genero <- summarise(generos, revenue_sum = sum(revenue))
+genero_con_mas_revenue <- head(sumas_por_genero, n = 1)
+```
+
+Las películas de `r genero_con_mas_revenue$genero_principal` obtuvieron mayores ganancias con un total de `r genero_con_mas_revenue$revenue_sum`
+
+## 4.8  ¿La cantidad de actores influye en los ingresos de las películas? ¿Se han hecho películas con más actores en los últimos años?
+
+``` {r}
+cor(movies$actorsAmount, movies$revenue)
+
+movies$year <- year
+
+ggplot(movies, aes(x=actorsAmount, y=revenue)) + 
+  geom_point()
+
+ggplot(movies, aes(x=actorsAmount, y=revenue)) + 
+  geom_boxplot()
+
+summary(movies$actorsAmount)
+
+quantile(movies$actorsAmount, seq(0,1,0.01))
+
+menores <- movies[movies$actorsAmount <=  123, ]
+
+ggplot(menores, aes(x=actorsAmount, y=revenue)) + 
+  geom_point()
+
+
+```
+
+Como se puede observar en la gráfica y con el valor de la correlación de `r cor(movies$actorsAmount, movies$revenue)`, la cantidad de actores no influye en los ingresos. Encontrando los valores atípicos analizando los quantiles, separados con 0.01, se filtraron los valores menores a los valores atípicos y finalmente se confirmó que no tienen relación.
+
+```{r}
+ggplot(movies, aes(x=year, y=actorsAmount)) + 
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+```
+
+En esta gráfica se puede observar que en los últimos años sí se ha aumentado la cantidad de actores en las películas.
+
+## Pregunta extra: ¿La popularidad de los actores en la película afecta sus ingresos?
+
+``` {r warning=FALSE}
+
+movies$actorsMaxPopularity <- lapply(strsplit(movies$actorsPopularity, "\\|"), function(x) max(as.double(x)))
+
+movies$actorsMaxPopularity <- as.numeric(movies$actorsMaxPopularity)
+movies$revenue <- as.numeric(movies$revenue)
+movies$actorsMaxPopularity<- movies$actorsMaxPopularity[1:nrow(movies)]
+
+ggplot(movies, aes(actorsMaxPopularity, revenue)) + 
+ geom_point() +
+ theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+cor(movies$revenue, movies$actorsMaxPopularity,method = "spearman", use="complete.obs")
+
+ggplot(movies, aes(x=actorsMaxPopularity, y=revenue)) + 
+  geom_boxplot()
+
+quantile(movies$actorsMaxPopularity, seq(0,1,0.01), na.rm = T)
+
+menos <- movies[movies$actorsMaxPopularity <= 82.57,]
+
+ggplot(menos, aes(actorsMaxPopularity, revenue)) + 
+ geom_point() +
+ theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+colnames(movies)
+Matriz_correlacion <- cor(movies[,c("revenue","budget","actorsMaxPopularity","voteAvg","voteCount","popularity","genresAmount","actorsAmount")])
+
+corrplot(Matriz_correlacion)
+
+```
+
+Como se puede observar en el análisis de los cuantiles, eliminación de valores atípicos y las gráficas generadas, la popularidad de los actores no afecta directamente a los ingresos de la película.
+
+## Pregunta extra: ¿El lenguaje en el que se produjo la película tiene relación con los votos recibidos por pelicula?
+
+``` {r}
+
+ingles <- movies[movies$originalLanguage == "en",]
+nrow(ingles)
+
+otros <- movies[movies$originalLanguage != "en",]
+nrow(otros)
+
+ggplot(ultimas_veinte, aes(originalLanguage, voteCount)) + 
+  geom_bar(stat="identity") +
+  xlab("Lenguaje original") +
+  ylab("Votos") +
+  ggtitle("Relacion de lenguaje con los votos recibidos") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+```
+
+Como se puede observar en la gráfica la mayoría de votos recibidos fueron en películas cuyo lenguaje original es el ingles. Cabe recalcar que hay `r nrow(ingles)` peliculas en ingles y `r nrow(otros)` peliculas en otros idiomas, lo que muestra que la mayoria son peliculas en ingles.
+
+

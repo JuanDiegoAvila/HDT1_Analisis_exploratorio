@@ -16,12 +16,254 @@ installed.packages("dplyr")
 installed.packages("ggplot2")
 installed.packages("purrr")
 installed.packages("corrplot")
+installed.packages("googledrive")
+installed.packages("tidyverse")
 
 library(dplyr)
 library(ggplot2)
 library(purrr)
 library(corrplot)
+
+
+summary(movies)
 ```
+
+## Variables a estudiar y su tipo
+#### Id: Cualitativa nominal  
+#### Budget: Cuantitativa continua -
+#### Genres: Cualitativa nominal
+#### HomePage: Cualitativa nominal
+#### ProductionCompany: Cualitativa nominal  
+#### ProductionCompanyCountry: Cualitativa nominal
+#### ProductionCountry: Cualitativa nominal
+#### Revenue: Cuantitativa continua -
+#### Runtime: Cuantitativa discreta -
+#### Video: Cualitativa nominal
+#### Director: Cualitativa nominal
+#### Actors: Cualivativa nominal
+#### ActorsPopularity: Cualitativa ordinal
+#### ActorsCharacter: Cualitativa nominal
+#### Title: Cualitativa nominal
+#### originalLanguage: Cualitativa nominal
+#### Popularity: Cualitativa ordinal
+#### Release date: Cualitativa ordinal
+#### VoteAvg: Cuantitativa continua -
+#### VoteCount: Cuantitativa discreta -
+#### GenresAmount: Cuantitativa discreta -
+#### ProductionCoAmount: Cuantitativa discreta -
+#### ProductionCountriesAmount: Cuantitativa discreta -
+#### ActorsAmount: Cuantitativa discreta -
+#### CastWomenAmount: Cuantitativa discreta -
+#### CastMenAmount: Cuantitativa discreta -
+
+## Análisis de Normalidad en Variables Cuantitativas
+
+### Budget
+```{r echo=FALSE}
+library(nortest)
+budget <- movies$budget
+hist(budget)
+qqnorm(budget)
+qqline(budget, col="red")
+
+lillie.test(budget)
+
+```
+### Revenue
+```{r echo=FALSE}
+revenue <- movies$revenue
+hist(revenue)
+qqnorm(revenue)
+qqline(revenue, col="red")
+
+lillie.test(revenue)
+```
+Al observar el histograma se puede ver que tiene un sesgo positivo bastante pronunciado por lo que con esto se puede decir que no sigue una distribución normal.
+Tambien el qqnorm muestra que los datos no siguen la linea de distribución normal, sobrepasando por completo la linea. 
+Finalmente el lillietest, el p-value es menor a 2.2e-16, al ser muy bajo no se rechaza la hipotesis nula de normalizacion. 
+### Runtime
+```{r echo=FALSE}
+runtime <- movies$runtime
+hist(runtime)
+qqnorm(runtime)
+qqline(runtime, col="red")
+
+lillie.test(runtime)
+```
+Al observar el histograma se puede ver que tiene un sesgo positivo bastante pronunciado por lo que con esto se puede decir que no sigue una distribución normal.
+Tambien el qqnorm muestra que los datos no siguen la linea de distribución normal, ya que es solo por una pequeña porcion en la cual pasa por la linea roja.
+Finalmente el lillietest, el p-value es menor a 2.2e-16, al ser muy bajo no se rechaza la hipotesis nula de normalizacion. 
+### VoteAvg
+```{r echo=FALSE}
+voteavg <- movies$voteAvg
+hist(voteavg)
+qqnorm(voteavg)
+qqline(voteavg, col="red")
+
+lillie.test(voteavg)
+
+```
+Al observar el histograma se puede ver que tiene un pequeño sesgo negativo sin embargo, no es suficiente para decir que no sigue distribución normal.
+Tambien el qqnorm muestra que algunos datos si se acoplan bastante bien a los la linea roja establecida por el qqline. A pesar de esto no hay muchos puntos que no sigue este comportamiento.
+Finalmente para determinar si sigue o no una distribucion normal se realizó el liliie test. En este caso se obtuvo que el valor es menor a 2.2e-16 por lo que se rechaza la hipotesis nula de normalizacion.
+
+### VoteCount
+```{r echo=FALSE}
+votecount <- movies$voteCount
+hist(votecount)
+qqnorm(votecount)
+qqline(votecount, col="red")
+
+lillie.test(votecount)
+```
+Al observar el histograma se puede ver que tiene un sesgo positivo muy notable lo cual indica que los datos no siguen una distribucion normal. 
+Tambien el qqnorm muestra que solo una parte pasa por la linea marcada por el qqline, indicando tambien que no sigue una distribución normal.
+Finalmente para determinar si sigue o no una distribucion normal se realizó el liliie test. En este caso se obtuvo que el valor es menor a 2.2e-16 por lo que se rechaza la hipotesis nula de normalizacion.
+
+
+### GenresAmount
+```{r echo=FALSE}
+genresamount <- movies$genresAmount
+hist(genresamount)
+qqnorm(genresamount)
+qqline(genresamount, col="red")
+
+lillie.test(genresamount)
+
+```
+Al observar el histograma se puede ver que tiene un sesgo positivo muy notable lo cual indica que los datos no siguen una distribucion normal. 
+Tambien el qqnorm muestra que solo son pequeños sectores que pasan sobre la linea marcada por el qqline, indicando tambien que no sigue una distribución normal.
+Finalmente para determinar si sigue o no una distribucion normal se realizó el liliie test. En este caso se obtuvo que el valor es menor a 2.2e-16 por lo que se rechaza la hipotesis nula de normalizacion.
+
+### ProductionCoAmount
+```{r echo=FALSE}
+prodcoamount <- movies$productionCoAmount
+hist(prodcoamount)
+qqnorm(prodcoamount)
+qqline(prodcoamount, col="red")
+
+lillie.test(prodcoamount)
+
+```
+Al observar el histograma se puede ver que tiene un sesgo positivo muy notable lo cual indica que los datos no siguen una distribucion normal. 
+Tambien el qqnorm muestra que solo es una pequeña parte de los datos que pasa sobre la linea marcada por el qqline, indicando tambien que no sigue una distribución normal.
+Finalmente para determinar si sigue o no una distribucion normal se realizó el liliie test. En este caso se obtuvo que el valor es menor a 2.2e-16 por lo que se rechaza la hipotesis nula de normalizacion.
+
+
+### ProductionCountriesAmount
+```{r echo=FALSE}
+prodcoa <- movies$productionCountriesAmount
+hist(prodcoa)
+qqnorm(prodcoa)
+qqline(prodcoa, col="red")
+
+lillie.test(prodcoa)
+
+```
+Al observar el histograma se puede ver que tiene un pequeño sesgo positivo muy notable lo cual indica que los datos no siguen una distribucion normal. 
+Tambien el qqnorm muestra solo son pequeños sectores que pasan sobre la linea marcada por el qqline, indicando tambien que no sigue una distribución normal.
+Finalmente para determinar si sigue o no una distribucion normal se realizó el liliie test. En este caso se obtuvo que el valor es menor a 2.2e-16 por lo que se rechaza la hipotesis nula de normalizacion.
+
+Este muestra un comportamineto similar a la variable estudiada anteriormente.
+
+### ActorsAmount
+```{r echo=FALSE}
+actorsa <- movies$actorsAmount
+hist(actorsa)
+qqnorm(actorsa)
+qqline(actorsa, col="red")
+
+lillie.test(actorsa)
+
+```
+En el histograma se puede observar que los datos se encuentran en un solo extremo, descartando que los datos sigan una distribución normal.
+En el qqnorm se puede observar que los datos se alinean casi perfectamente a la qqline, pero hasta el final esta tendecia se pierde por los punto atipicos que la sobresapan. 
+Finalmente para determinar si sigue o no una distribucion normal se realizó el liliie test. En este caso se obtuvo que el valor es menor a 2.2e-16 por lo que se rechaza la hipotesis nula de normalizacion.
+
+### CastWomenAmount
+```{r echo=FALSE}
+womena <- as.integer(movies$castWomenAmount)
+hist(womena)
+qqnorm(womena)
+qqline(womena, col="red")
+
+lillie.test(womena)
+
+```
+En el histograma se puede observar que los datos se encuentran en un solo extremo, descartando que los datos sigan una distribución normal.
+En el qqnorm se puede observar que los datos se alinean casi perfectamente a la qqline, pero hasta el final esta tendecia se pierde por los punto atipicos que la sobresapan. 
+Finalmente para determinar si sigue o no una distribucion normal se realizó el liliie test. En este caso se obtuvo que el valor es menor a 2.2e-16 por lo que se rechaza la hipotesis nula de normalizacion.
+
+### CastMenAmount
+```{r echo=FALSE}
+mena <- as.integer(movies$castMenAmount)
+hist(mena)
+qqnorm(mena)
+qqline(mena, col="red")
+
+lillie.test(mena)
+
+```
+En el histograma se puede observar que los datos se encuentran en un solo extremo, descartando que los datos sigan una distribución normal.
+En el qqnorm se puede observar que los datos se alinean casi perfectamente a la qqline, pero hasta el final esta tendecia se pierde por los punto atipicos que la sobresapan. 
+Finalmente para determinar si sigue o no una distribucion normal se realizó el liliie test. En este caso se obtuvo que el valor es menor a 2.2e-16 por lo que se rechaza la hipotesis nula de normalizacion.
+
+El comportamiento de las ultimas tres variables es muy silimar debido a lo que observa en todas las pruebas de normalización.
+
+## Tablas de Frecuencia
+
+### Original Language
+```{r echo=FALSE}
+table(movies$originalLanguage)
+```
+
+### Production Country
+```{r echo=FALSE}
+table(movies$productionCountry)
+```
+
+### Video
+```{r echo=FALSE}
+table(movies$video)
+```
+
+
+### 1.¿Cuales son las 10 peliculas que contaron con más prsupuesto?
+```{r echo=FALSE}
+ordered_budget <- movies[order(movies$budget, decreasing=T),]
+topbudget<- ordered_budget[1:10,]
+
+topbudget[,c("title")]
+```
+
+### 2. ¿Cuáles son las 10 películas que más ingresos tuvieron?
+```{r echo=FALSE}
+ordered_revenue <- movies[order(movies$revenue, decreasing=T), ]
+toprevenue<- ordered_revenue[1:10,]
+
+toprevenue[,c("title")]
+
+```
+
+### 9.¿Es posible que la cantidad de hombres y mujeres en el reparto influya en la popularidad y los ingresos de las películas? 
+
+```{r echo =FALSE}
+library(corrplot)
+
+movies$castMenAmount <- as.numeric(gsub("[^0-9]", "", movies$castMenAmount))
+movies$castWomenAmount <- as.numeric(gsub("[^0-9]", "", movies$castWomenAmount))
+
+movies$castMenAmount[is.na(movies$castMenAmount)] <- 0
+movies$castWomenAmount[is.na(movies$castWomenAmount)] <- 0
+
+castrevpop <- cor(movies[,c("castMenAmount", "castWomenAmount", "revenue", "popularity")])
+
+corrplot(castrevpop)
+```
+
+Como se puede observar en la grafica, no se presenta ningun tipo de relacion entre la popularidad e ingresos con la cantidad de actores hombres y mujeres. 
+
+
 
 
 ## 4.3 ¿Cuál es la película que más votos tuvo?
@@ -142,7 +384,7 @@ ggplot(movies, aes(x=year, y=actorsAmount)) +
 
 En esta gráfica se puede observar que en los últimos años sí se ha aumentado la cantidad de actores en las películas.
 
-## Pregunta extra: ¿La popularidad de los actores en la película afecta sus ingresos?
+### Extra: ¿La popularidad de los actores en la película afecta sus ingresos?
 
 ``` {r warning=FALSE}
 
@@ -178,7 +420,7 @@ corrplot(Matriz_correlacion)
 
 Como se puede observar en el análisis de los cuantiles, eliminación de valores atípicos y las gráficas generadas, la popularidad de los actores no afecta directamente a los ingresos de la película.
 
-## Pregunta extra: ¿El lenguaje en el que se produjo la película tiene relación con los votos recibidos por pelicula?
+### Extra: ¿El lenguaje en el que se produjo la película tiene relación con los votos recibidos por pelicula?
 
 ``` {r}
 
@@ -200,3 +442,29 @@ ggplot(ultimas_veinte, aes(originalLanguage, voteCount)) +
 Como se puede observar en la gráfica la mayoría de votos recibidos fueron en películas cuyo lenguaje original es el ingles. Cabe recalcar que hay `r nrow(ingles)` peliculas en ingles y `r nrow(otros)` peliculas en otros idiomas, lo que muestra que la mayoria son peliculas en ingles.
 
 
+### Extra: ¿Hay alguna diferencia en los ingresos de las películas basadas en la cantidad de mujeres y hombres en el reparto?
+
+```{r echo = FALSE}
+library(tidyverse)
+
+movies_women_cast <- filter(movies, castWomenAmount > castMenAmount)
+movies_men_cast <- filter(movies, castWomenAmount < castMenAmount)
+
+women_mean <- mean(movies_women_cast$revenue)
+men_mean <- mean(movies_men_cast$revenue)
+
+t.test(movies_women_cast$revenue, movies_men_cast$revenue)
+
+```
+Al realizar la prueba anterior se obtiene que el p-value es menor que 0.05 el cual nos hace rechazar la hipotesis nula y afirmar que si hay una diferencia significativa entre la media de ingresos en peliculas con más y media de ingresos en peliculas con más mujeres. 
+
+### Extra: ¿Cuál es la proporcion de mujeres en las top 5 peliculas con más ingresos?
+```{r echo=TRUE}
+ordered_budget <- movies[order(movies$budget, decreasing=T),]
+topbudget<- ordered_budget[1:5,]
+
+movies$castWomenAmount <- as.numeric(gsub("[^0-9]", "", movies$castWomenAmount))
+movies$castWomenAmount[is.na(movies$castWomenAmount)] <- 0
+
+movies$womenprop <- movies
+```
